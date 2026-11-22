@@ -17,11 +17,14 @@ def intervals(text, code, valued=False):
     return sorted(resolved)
 
 
-def evaluate(row):
+def evaluate(row, policy_override=None, policy_version=None, effective=None):
     closed, as_of = calendar(row['结案日']),calendar(row['查询日'])
+    if effective is not None:
+        as_of = calendar(effective)
     if as_of < closed or closed.year > 9800:
         raise DataError('ARCHIVE_DATES', '查询日须不早于结案，结案年份至多 9800')
-    policies = intervals(row['保管政策'],'ARCHIVE_POLICY',True)
+    policy_text = policy_override if policy_override is not None else row['保管政策']
+    policies = intervals(policy_text,'ARCHIVE_POLICY',True)
     applicable = [(a,b,years) for a,b,years in policies if a <= closed < b]
     if len(applicable) != 1:
         raise DataError('ARCHIVE_POLICY', '结案日须恰好命中一条保管政策')
@@ -32,6 +35,8 @@ def evaluate(row):
         expiry = date(closed.year+years,3,1)
     eligible = expiry
     proof = [('保管政策生效',policy_start,''),('原最早处置日',expiry,'')]
+    if policy_version is not None:
+        proof.append(('采用年限版本',policy_version,''))
     for start,end,_ in intervals(row['留置区段'],'ARCHIVE_HOLD'):
         if start <= eligible < end:
             eligible = end

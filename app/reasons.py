@@ -12,3 +12,9 @@ REASONS = {
 }
 
 REASONS.update({'ARCHIVE_POLICY': '保管版本冲突或缺失', 'ARCHIVE_HOLD': '留置区段无效', 'ARCHIVE_DATES': '日期范围无效', 'DATE': '日期格式无效', 'REV_BLOCKED': '较新来源尚未采信'})
+REASONS.update({
+    'REVISION_DUP': '修订表档案件重复', 'REVISION_STATUS': '修订状态无效', 'REVISION_KEY': '修订档案件未采信',
+    'REVISION_UNRESOLVED': '修订重算存在失败件', 'ROSTER_CONFLICT': '两版同时放行同一档案件',
+    'ROSTER_UNKNOWN': '没有此名单', 'ROSTER_NO_BACKUP': '没有可恢复的旧版名单',
+    'RETAIN': '继续保管',
+})

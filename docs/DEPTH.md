@@ -15,6 +15,7 @@
 | M5 保管台账 | 核对独立清单和各类差异 | `POST /api/reconcile` | `app/modules/reconcile/service.py` | `tests/test_reconcile.py` |
 | M6 留置批次 | 打开历史批次并对原文件复跑 | `POST /api/runs` | `app/modules/runs/service.py` | `tests/test_runs.py` |
 | M7 处置复核 | 登记复核结论并下载证据 | `POST /api/review/{run_id}` | `app/modules/review/decisions.py` | `tests/test_review.py` |
+| M8 年限切换 | 修订生效后生成逐件带版本的可放行名单，原子切换并可回滚 | `POST /api/release/roster` | `app/modules/release/roster.py` | `tests/test_release.py` |
 
 ## 陷阱登记
 

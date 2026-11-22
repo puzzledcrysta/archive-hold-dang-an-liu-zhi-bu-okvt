@@ -129,3 +129,10 @@ td details { min-width: 5em; margin-top: 4px; color: var(--muted); border-left: 
   .scroll, #signal { overflow: visible; max-height: none; }
   thead { display: table-header-group; }
 }
+.release-desk { margin: 0 var(--gap) var(--gap); padding: 0; }
+.release-desk .panel__body { display: grid; gap: 12px; }
+.release-desk form { display: grid; gap: 10px; }
+.release-desk .kpis { grid-template-columns: repeat(5,minmax(0,1fr)); margin: 0; }
+.release-desk .scroll { max-height: 46vh; }
+#release-notice { min-height: 1.2em; font: 13px var(--font-mono); }
+#release-notice.problem { color: #8a2f48; }

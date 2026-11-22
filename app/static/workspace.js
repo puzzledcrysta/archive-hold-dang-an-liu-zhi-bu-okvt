@@ -17,6 +17,12 @@ let renderEpoch = 0;
 let activeView = null;
 const filter = byId('filter');
 const differences = byId('differences');
+const releasePanel = byId('release-panel');
+const releaseGrid = byId('release-grid');
+const releaseNotice = byId('release-notice');
+const releaseSummary = byId('release-summary');
+const releaseSwitch = byId('release-switch');
+let preparedRoster = null;
 
 function filterTable() {
   if (!activeView) return;
@@ -93,6 +99,7 @@ async function render() {
   const stage = selected;
   byId('phase').textContent = settings.tabs[stage];
   byId('review').hidden = true;
+  toggleReleasePanel(stage);
   for (const link of links) {
     if (link.dataset.module === stage) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
@@ -243,4 +250,81 @@ byId('review').addEventListener('submit', async event => {
     if (error.status === 409) await render();
   }
 });
+
+function releaseNote(message, error = false) {
+  releaseNotice.value = message;
+  releaseNotice.classList.toggle('problem', error);
+}
+
+function renderRoster(roster) {
+  preparedRoster = roster;
+  byId('release-id').textContent = roster.roster_id.slice(0, 9);
+  byId('release-id').title = roster.roster_id;
+  releaseSummary.replaceChildren(...[
+    ['修订件', roster.counts.revised], ['已排期', roster.counts.scheduled],
+    ['复核中', roster.counts.under_review], ['可放行', roster.counts.releasable],
+    ['继续保管', roster.counts.retained],
+  ].map(([label, value]) => {
+    const card = el('div', undefined, 'kpi');
+    card.append(el('small', label), el('strong', String(value)));
+    return card;
+  }));
+  const rows = [...roster.releasable, ...roster.retained];
+  const columns = [
+    [settings.key, 'key'], ['状态', 'schedule_status'], ['采用年限版本', 'policy_version'],
+    ['最早处置日', 'earliest_disposal', 'num'],
+    ['查询判定', row => tag(row.verdict === '可处置' ? 'MATCH' : 'RETAIN')],
+    ['依据', row => evidence('计算依据', row.proof.map(item => `${item.metric} · ${item.value}`))],
+  ];
+  table(releaseGrid, columns, rows);
+  releaseSwitch.hidden = false;
+}
+
+async function loadActiveRoster() {
+  const active = await query('/api/release/active');
+  if (active.roster) {
+    renderRoster(active.roster);
+    releaseNote('当前展示有效名单');
+  }
+}
+
+byId('release-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const body = {
+    revision: byId('revision-csv').value,
+    effective_date: byId('effective-date').value,
+    ...inputs,
+  };
+  try {
+    const report = await query('/api/release/roster', body);
+    renderRoster(report.roster);
+    releaseNote(report.created ? '名单已生成并保存' : '同一修订已存在有效名单，未重复生成');
+  } catch (error) { releaseNote(error.message, true); }
+});
+
+releaseSwitch.addEventListener('click', async () => {
+  if (!preparedRoster) return;
+  releaseSwitch.disabled = true;
+  try {
+    const switched = await query(`/api/release/roster/${preparedRoster.roster_id}/switch`, {});
+    releaseNote(switched.previous ? `已切换，旧名单 ${switched.previous.slice(0, 9)} 已备份可恢复` : '已设为有效名单');
+  } catch (error) { releaseNote(error.message, true); }
+  finally { releaseSwitch.disabled = false; }
+});
+
+byId('release-rollback').addEventListener('click', async () => {
+  try {
+    const restored = await query('/api/release/rollback', {});
+    releaseNote(`已恢复旧版名单 ${restored.active.slice(0, 9)}`);
+    await loadActiveRoster();
+  } catch (error) { releaseNote(error.message, true); }
+});
+
+function toggleReleasePanel(stage) {
+  releasePanel.hidden = stage !== 'release';
+  if (stage === 'release' && !preparedRoster) {
+    loadActiveRoster().catch(error => releaseNote(error.message, true));
+  }
+}
+
 render();

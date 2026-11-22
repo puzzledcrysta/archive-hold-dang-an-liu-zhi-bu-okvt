@@ -13,6 +13,18 @@ CREATE TABLE IF NOT EXISTS reviews (
   decision TEXT NOT NULL, note TEXT NOT NULL, changed TEXT NOT NULL,
   PRIMARY KEY(run_id,version)
 );
+CREATE TABLE IF NOT EXISTS rosters (
+  id TEXT PRIMARY KEY, source BLOB NOT NULL, revision BLOB NOT NULL,
+  result TEXT NOT NULL, created TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS active_roster (
+  slot TEXT PRIMARY KEY, roster_id TEXT NOT NULL REFERENCES rosters(id),
+  switched_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS roster_history (
+  roster_id TEXT NOT NULL REFERENCES rosters(id), archived_at TEXT NOT NULL,
+  note TEXT NOT NULL
+);
 """
 
 

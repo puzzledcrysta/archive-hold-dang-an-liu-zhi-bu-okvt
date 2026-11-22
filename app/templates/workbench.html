@@ -59,6 +59,25 @@
         <output id="notice" role="status"></output>
       </form>
     </section></div>
+      <section class="panel release-desk" id="release-panel" hidden aria-labelledby="release-title">
+        <div class="panel__head"><h2 id="release-title">年限切换 · 可放行名单</h2><span class="num" id="release-id"></span></div>
+        <div class="panel__body">
+          <form id="release-form">
+            <label>生效日 <input id="effective-date" type="date" value="2026-01-01" required></label>
+            <label>修订表（档案件,状态,保管政策）
+              <textarea id="revision-csv" aria-label="年限修订 CSV" rows="5"></textarea>
+            </label>
+            <div class="actions">
+              <button type="submit" class="btn btn--primary">生成切换名单</button>
+              <button type="button" id="release-switch" class="btn" hidden>切换为有效名单</button>
+              <button type="button" id="release-rollback" class="btn">恢复旧版名单</button>
+            </div>
+          </form>
+          <div id="release-summary" class="kpis" aria-label="名单指标"></div>
+          <div class="scroll" id="release-grid"><p class="empty">生成名单后逐件查看采用的年限版本</p></div>
+          <output id="release-notice" role="status"></output>
+        </div>
+      </section>
       </main>
       <footer class="statusbar"><span id="state" role="status">等待输入</span><a href="/openapi.json">接口</a><span>UTC</span></footer>
     </div>

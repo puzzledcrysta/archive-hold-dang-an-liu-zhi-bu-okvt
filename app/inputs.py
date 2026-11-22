@@ -50,6 +50,20 @@ class Review(BaseModel):
     note: str = Field(default='',max_length=500)
 
 
+class Revision(BaseModel):
+    data: CsvText | None = None
+    data_base64: EncodedCsv | None = None
+    revision: CsvText | None = None
+    revision_base64: EncodedCsv | None = None
+    effective_date: str = Field(pattern=r'^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+
+    def raw(self):
+        return input_bytes(self.data, self.data_base64, SAMPLE_ROOT/'shift.csv')
+
+    def revision_bytes(self):
+        return input_bytes(self.revision, self.revision_base64, SAMPLE_ROOT/'revision.csv')
+
+
 def read_sample(name):
     choices = {'shift':'shift.csv','external':'external.csv'}
     if name not in choices:
